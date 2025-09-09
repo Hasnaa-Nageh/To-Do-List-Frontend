@@ -17,7 +17,10 @@ export const AuthProvider = ({ children }) => {
       setUser(u);
       return u;
     } catch (err) {
-      console.log(err);
+      // ✅ نتجاهل 401 لأنها معناها مستخدم مش لوج إن
+      if (err.response?.status !== 401) {
+        console.error("Auth error:", err);
+      }
       setUser(null);
       return null;
     } finally {
@@ -36,16 +39,18 @@ export const AuthProvider = ({ children }) => {
     const u = await getMe();
     return { res, user: u };
   };
+
   const logout = async () => {
     try {
       await api.post("/auth/logout");
     } catch (err) {
-      console.log(err);
+      console.error("Logout error:", err);
     } finally {
       setUser(null);
       navigate("/login");
     }
   };
+
   useEffect(() => {
     getMe();
   }, []);
@@ -58,6 +63,5 @@ export const AuthProvider = ({ children }) => {
     </AuthContext.Provider>
   );
 };
-
 
 export const useAuth = () => useContext(AuthContext);
